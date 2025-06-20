@@ -1,0 +1,52 @@
+#services:
+ # app:
+  #  container_name: ms-auth-session
+   # image: edchulde/ms-auth-session:latest # 🚀 Siempre usa la última imagen
+    #restart: always # 🚀 Se reinicia automáticamente si falla
+    #pull_policy: always # 🚀 Baja la última imagen cada vez que ejecutas `docker compose up`
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    #environment:
+      #env_file: '.env'
+    #ports:
+      #- 9000:3000
+    #volumes:
+      #- .:/app
+      #- /app/node_modules
+    #command: npm run start:dev
+
+
+version: '3.8'
+
+services:
+  app:
+    container_name: ms-auth-session
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: edchulde/ms-auth-session:latest
+    restart: always
+    env_file: .env
+    ports:
+      - "9000:3000"
+    command: npm run start:dev
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: postgres-auth
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ms_auth
+    ports:
+      - "5440:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
