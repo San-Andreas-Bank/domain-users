@@ -24,76 +24,143 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# 🧩 Domain: Users - Microservices System
 
-## Project setup
+This repository contains the `domain-users` subsystem of the **San Andres Bank**, focused on user authentication and session management using microservices architecture.
 
-```bash
-$ npm install
-```
+## 🚀 Overview
 
-## Compile and run the project
+This project is built using **NestJS** and **TypeScript**, containerized with **Docker**, and orchestrated using **Docker Compose**. It includes JWT-based authentication, password reset via email (OTP & token), and integration with PostgreSQL.
 
-```bash
-# development
-$ npm run start
+## 📦 Microservices Included
 
-# watch mode
-$ npm run start:dev
+| Microservice        | Description                            | Language | Tech Stack  |
+|---------------------|----------------------------------------|----------|-------------|
+| `auth-session`      | Manages login, logout, JWT, sessions   | TypeScript | NestJS + PostgreSQL |
 
-# production mode
-$ npm run start:prod
-```
+## 🛠 Technologies Used
 
-## Run tests
+- **NestJS** (Node.js Framework)
+- **TypeScript**
+- **PostgreSQL** (via Docker container)
+- **Docker & Docker Compose**
+- **JWT** (Authentication)
+- **Nodemailer** (Email for password recovery)
+- **Postman** (API testing)
+- **GitHub** (Version control)
 
-```bash
-# unit tests
-$ npm run test
+## ⚙️ Environment Variables (`.env`)
 
-# e2e tests
-$ npm run test:e2e
+```env
+APP_PORT=3000
 
-# test coverage
-$ npm run test:cov
-```
+# PostgreSQL DB
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=admin123
+POSTGRES_DB=ms_auth
 
-## Deployment
+# JWT
+JWT_SECRET=AncestralFlame
+JWT_EXPIRE_TIME=7 days
+TOKEN_EXPIRATION_MS=60000
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+# Email Service (Gmail)
+EMAIL_USER=edisonchulde21@gmail.com
+EMAIL_PASSWORD=iddboyfjcangogna
+JWT_PASSWORD_VERIFICATION_TOKEN_SECRET=password_ancestral_flame
+JWT_PASSWORD_VERIFICATION_TOKEN_EXPIRATION_TIME=600000
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+EMAIL_RESET_PASSWORD_URL=
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+## 🐳 Docker Compose Setup
+Your docker-compose.yml launches two containers: the NestJS app and a PostgreSQL database.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+version: '3.8'
 
-## Resources
+services:
+  app:
+    container_name: ms-auth-session
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: edchulde/ms-auth-session:latest
+    restart: always
+    env_file: .env
+    ports:
+      - "9000:3000"
+    command: npm run start:dev
+    depends_on:
+      - db
 
-Check out a few resources that may come in handy when working with NestJS:
+  db:
+    image: postgres:15
+    container_name: postgres-auth
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ms_auth
+    ports:
+      - "5440:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+volumes:
+  pgdata:
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+  🧪 Testing the Microservices
+Once deployed (locally or in EC2):
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+✅ Open Postman
 
-## License
+✅ Import the collection Lightbuild_Auth_Collection.postman_collection.json
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+✅ Update the environment variable or base URL to:
+http://<YOUR_EC2_PUBLIC_IP>:9000
+
+Example:
+
+bash
+Copiar
+Editar
+http://34.229.92.173:9000/auth/signup
+🚀 Deployment on AWS EC2
+SSH into your EC2:
+
+bash
+Copiar
+Editar
+ssh -i "your-key.pem" ubuntu@<EC2_PUBLIC_IP>
+Clone the GitHub repo:
+
+bash
+Copiar
+Editar
+git clone https://github.com/San-Andreas-Bank/domain-users.git
+cd domain-users
+Build and start the containers:
+
+bash
+Copiar
+Editar
+docker-compose up --build -d
+Check containers:
+
+bash
+Copiar
+Editar
+docker ps
+🔒 Security Notes
+Ensure .env is not committed to GitHub (add it to .gitignore).
+
+Rotate credentials and secrets before moving to production.
+
+👨‍💻 Author
+Made by Edison Chulde
+Educational project for the course: Distributed Programming - Universidad
+
+
