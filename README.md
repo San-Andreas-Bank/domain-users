@@ -124,39 +124,24 @@ http://<YOUR_EC2_PUBLIC_IP>:9000
 
 Example:
 
-bash
-Copiar
-Editar
 http://34.229.92.173:9000/auth/signup
+
 🚀 Deployment on AWS EC2
-SSH into your EC2:
-
-bash
-Copiar
-Editar
+1. SSH into your EC2:
 ssh -i "your-key.pem" ubuntu@<EC2_PUBLIC_IP>
-Clone the GitHub repo:
 
-bash
-Copiar
-Editar
+2. Clone the GitHub repo:
 git clone https://github.com/San-Andreas-Bank/domain-users.git
 cd domain-users
-Build and start the containers:
 
-bash
-Copiar
-Editar
+3. Build and start the containers:
 docker-compose up --build -d
-Check containers:
 
-bash
-Copiar
-Editar
+4. Check containers:
 docker ps
+
 🔒 Security Notes
 Ensure .env is not committed to GitHub (add it to .gitignore).
-
 Rotate credentials and secrets before moving to production.
 
 👨‍💻 Author
