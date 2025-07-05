@@ -3,8 +3,8 @@ name: Deploy Auth Service to EC2
 on:
   push:
     branches:
-      - main  # se ejecuta en cada push a main
-      - qa 
+      - main
+      - qa
     paths:
       - '**/*'
 
@@ -20,28 +20,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        # Paso 1: Clonar el código
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm ci
 
-     # ✅ Paso 3: Ejecutar ESLint solo para errores
       - name: Run ESLint (only fail on errors)
         run: npx eslint . --ext .ts --max-warnings=0
 
-        # Paso 4: Login en Docker Hub
       - name: Login to Docker Hub
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-        # Paso 5: Build & Push Docker image
       - name: Build and push Docker image
         run: |
           docker build -t $DOCKER_USERNAME/domain-auth:latest .
           docker push $DOCKER_USERNAME/domain-auth:latest
 
-        # Paso 6: Deploy en EC2
       - name: Deploy to EC2 via SSH (run container only)
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -53,5 +48,4 @@ jobs:
             docker stop domain-auth || true && docker rm domain-auth || true
             docker run -d --name domain-auth \
               -p 9000:3000 \
-              --env-file /home/ubuntu/.env.auth \
               $DOCKER_USERNAME/domain-auth:latest
