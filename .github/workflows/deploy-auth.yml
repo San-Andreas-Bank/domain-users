@@ -49,8 +49,7 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_KEY }}
           source: ".env"
-          target: "/home/ubuntu/.env"
-          strip_components: 1
+          target: "/home/ubuntu"
 
       # Paso 7: Desplegar en EC2
       - name: Deploy to EC2 via SSH (run container only)
