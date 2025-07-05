@@ -19,29 +19,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso 1: Clonar el código
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Paso 2: Instalar dependencias
       - name: Install dependencies
         run: npm ci
 
-      # Paso 3: Ejecutar ESLint (errores solamente)
       - name: Run ESLint (only fail on errors)
         run: npx eslint . --ext .ts --max-warnings=0
 
-      # Paso 4: Login en Docker Hub
       - name: Login to Docker Hub
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-      # Paso 5: Build y push de imagen Docker
       - name: Build and push Docker image
         run: |
           docker build -t $DOCKER_USERNAME/domain-auth:latest .
           docker push $DOCKER_USERNAME/domain-auth:latest
 
-      # ✅ Paso 6: Subir archivo .env correctamente como archivo, no como carpeta
       - name: Upload .env file to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -49,9 +43,8 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_KEY }}
           source: ".env"
-          target: "/home/ubuntu/.env"   # 👈 aseguramos que sea un archivo, no carpeta
+          target: "/home/ubuntu/.env"
 
-      # Paso 7: Desplegar en EC2
       - name: Deploy to EC2 via SSH (run container only)
         uses: appleboy/ssh-action@v1.0.0
         with:
