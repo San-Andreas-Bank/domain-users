@@ -1,0 +1,47 @@
+name: Deploy Auth Services to EC2
+
+on:
+  push:
+    branches:
+      - main  # ← Ahora se ejecuta cuando haces push a main
+    paths:
+      - '**/*'
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+  EC2_HOST: ${{ secrets.EC2_HOST }}
+  EC2_KEY: ${{ secrets.EC2_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t $DOCKER_USERNAME/domain-auth:latest .
+          docker push $DOCKER_USERNAME/domain-auth:latest
+
+      - name: Connect to EC2 and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ env.EC2_KEY }}
+          script: |
+            if [ ! -d "domain-users" ]; then
+              git clone https://github.com/San-Andreas-Bank/domain-users.git
+            fi
+            cd domain-users
+            git pull
+            docker pull $DOCKER_USERNAME/domain-auth:latest
+            docker-compose down
+            docker-compose up -d
