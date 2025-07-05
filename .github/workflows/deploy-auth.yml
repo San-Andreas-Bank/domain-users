@@ -3,7 +3,6 @@ name: Deploy Auth Service to EC2
 on:
   push:
     branches:
-      - main
       - qa
     paths:
       - '**/*'
@@ -20,23 +19,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Paso 1: Clonar el código
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Paso 2: Instalar dependencias
       - name: Install dependencies
         run: npm ci
 
+      # Paso 3: Ejecutar ESLint (errores solamente)
       - name: Run ESLint (only fail on errors)
         run: npx eslint . --ext .ts --max-warnings=0
 
+      # Paso 4: Login en Docker Hub
       - name: Login to Docker Hub
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
+      # Paso 5: Build y push de imagen Docker
       - name: Build and push Docker image
         run: |
           docker build -t $DOCKER_USERNAME/domain-auth:latest .
           docker push $DOCKER_USERNAME/domain-auth:latest
 
+      # Paso 6: Subir archivo .env a EC2
+      - name: Upload .env file to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ env.EC2_KEY }}
+          source: ".env"
+          target: "/home/ubuntu/.env"
+
+      # Paso 7: Desplegar en EC2
       - name: Deploy to EC2 via SSH (run container only)
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -48,4 +63,5 @@ jobs:
             docker stop domain-auth || true && docker rm domain-auth || true
             docker run -d --name domain-auth \
               -p 9000:3000 \
+              --env-file /home/ubuntu/.env \
               $DOCKER_USERNAME/domain-auth:latest
