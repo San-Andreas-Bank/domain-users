@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # se ejecuta en cada push a main
+      - qa 
     paths:
       - '**/*'
 
@@ -23,9 +24,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: npm ci
+
      # ✅ Paso 3: Ejecutar ESLint solo para errores
       - name: Run ESLint (only fail on errors)
-        run: npx eslint . --ext .ts
+        run: npx eslint . --ext .ts --max-warnings=0
 
         # Paso 4: Login en Docker Hub
       - name: Login to Docker Hub
