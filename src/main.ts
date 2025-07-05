@@ -32,15 +32,16 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
-    // Esto ayuda a prevenir sobrecargas y ataques DDoS.
-    app.use(
-      rateLimit({
-        windowMs: 60 * 1000, // Ventana de 1 minuto
-        max: 5, // Máximo 5 peticiones por IP en la ventana de 1 minuto
-        message: 'Has excedido el límite de solicitudes. Intenta de nuevo más tarde.',
-        headers: true, // Incluye cabeceras con información sobre los límites
-      }),
-    );
+  // Esto ayuda a prevenir sobrecargas y ataques DDoS.
+  app.use(
+    rateLimit({
+      windowMs: 60 * 1000, // Ventana de 1 minuto
+      max: 5, // Máximo 5 peticiones por IP en la ventana de 1 minuto
+      message:
+        'Has excedido el límite de solicitudes. Intenta de nuevo más tarde.',
+      headers: true, // Incluye cabeceras con información sobre los límites
+    }),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -13,19 +13,18 @@ export function IsDateFormat(options?: ValidationOptions) {
       propertyName: propertyName,
       options,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: any) {
           if (typeof value === 'string') {
             const dateDDMMYYYY = parse(value, 'dd/MM/yyyy', new Date());
             const dateYYYYMMDD = parse(value, 'yyyy/MM/dd', new Date());
-            // const dateISO = parse(value, 'yyyy-MM-dd', new Date());
-            const dateISO = parseISO(value); // Parseamos el valor como ISO
+            const dateISO = parseISO(value);
 
-            // Validar si el valor es un formato de fecha válido
-            return isValid(dateDDMMYYYY) || isValid(dateYYYYMMDD) || isValid(dateISO);
+            return (
+              isValid(dateDDMMYYYY) || isValid(dateYYYYMMDD) || isValid(dateISO)
+            );
           }
 
-          // Si el valor ya es un objeto Date, lo validamos
-          if (value instanceof Date) return !isNaN(value.getTime()); 
+          if (value instanceof Date) return !isNaN(value.getTime());
 
           return false;
         },

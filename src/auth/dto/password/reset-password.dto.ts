@@ -1,9 +1,7 @@
 import { PickType } from '@nestjs/mapped-types';
 import {
-  IsEmail,
   IsNotEmpty,
   IsString,
-  MinLength,
   IsOptional,
   Length,
   Matches,
