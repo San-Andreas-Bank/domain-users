@@ -41,7 +41,7 @@ jobs:
           docker build -t $DOCKER_USERNAME/domain-auth:latest .
           docker push $DOCKER_USERNAME/domain-auth:latest
 
-      # Paso 6: Subir archivo .env a EC2
+      # ✅ Paso 6: Subir archivo .env correctamente como archivo, no como carpeta
       - name: Upload .env file to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -49,7 +49,7 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_KEY }}
           source: ".env"
-          target: "/home/ubuntu"
+          target: "/home/ubuntu/.env"   # 👈 aseguramos que sea un archivo, no carpeta
 
       # Paso 7: Desplegar en EC2
       - name: Deploy to EC2 via SSH (run container only)
