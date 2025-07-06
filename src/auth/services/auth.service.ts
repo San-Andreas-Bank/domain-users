@@ -39,11 +39,15 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-  async createLogin(user: User): Promise<{ userId: string; username: string; accessToken: string }> {
+  async createLogin(
+    user: User,
+  ): Promise<{ userId: string; username: string; accessToken: string }> {
     try {
       const payload = { sub: user.id, email: user.email };
       const initDateToken = new Date();
-      const expirationToken = new Date(initDateToken.getTime() + TOKEN_EXPIRATION_MS);
+      const expirationToken = new Date(
+        initDateToken.getTime() + TOKEN_EXPIRATION_MS,
+      );
       const accessToken = this.jwtService.sign(payload, {
         expiresIn: TOKEN_EXPIRATION_MS / 1000,
         algorithm: 'HS256',
@@ -65,7 +69,9 @@ export class AuthService {
     }
   }
 
-  async createLogout({ email }: CreateLogoutDto): Promise<{ ok: boolean; msg: string }> {
+  async createLogout({
+    email,
+  }: CreateLogoutDto): Promise<{ ok: boolean; msg: string }> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       throw new NotFoundException(`No user found for email: ${email}`);
@@ -83,7 +89,10 @@ export class AuthService {
   async userExists({ email }: CreateSignupDto): Promise<void> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user) {
-      throw new HttpException('Email duplicated, please enter another email.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Email duplicated, please enter another email.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -114,7 +123,10 @@ export class AuthService {
 
       this.logger.log('Checking user existence');
       if (!user) {
-        throw new HttpException(`No user found for email: ${email}`, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          `No user found for email: ${email}`,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       console.log(`🔐 Reset info para ${email}:`);
@@ -124,11 +136,18 @@ export class AuthService {
       await this.emailService.sendResetPasswordLink(email);
     } catch (error) {
       this.logger.error('Error in forgotPassword function', error);
-      throw new HttpException(`No user found for email: ${email}`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        `No user found for email: ${email}`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  async resetPasswordOTP(otp: string, email: string, newPassword: string): Promise<boolean> {
+  async resetPasswordOTP(
+    otp: string,
+    email: string,
+    newPassword: string,
+  ): Promise<boolean> {
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
@@ -154,7 +173,10 @@ export class AuthService {
     return true;
   }
 
-  async resetPasswordToken(token: string, newPassword: string): Promise<boolean> {
+  async resetPasswordToken(
+    token: string,
+    newPassword: string,
+  ): Promise<boolean> {
     try {
       const email = await this.emailService.decodeConfirmationToken(token);
       const user = await this.userRepository.findOne({ where: { email } });
@@ -163,7 +185,10 @@ export class AuthService {
         throw new NotFoundException(`No token valid`);
       }
 
-      if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      if (
+        !user.resetPasswordExpires ||
+        user.resetPasswordExpires < new Date()
+      ) {
         throw new UnauthorizedException('Token has expired');
       }
 
@@ -185,7 +210,10 @@ export class AuthService {
         throw error;
       }
 
-      throw new HttpException('Internal Error Forgot Password', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Internal Error Forgot Password',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
