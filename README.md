@@ -150,4 +150,4 @@ Educational project for the course: Distributed Programming - Universidad
 
 ✅ CI/CD test: updated on 2025-07-05
 
-# Trigger test222
+# Trigger test2
