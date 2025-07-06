@@ -51,6 +51,7 @@ jobs:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_KEY }}
+          envs: DOCKER_USERNAME
           script: |
             echo "🔍 Verificando variable DOCKER_USERNAME: $DOCKER_USERNAME"
             echo "📦 Imagen a ejecutar: $DOCKER_USERNAME/domain-auth:latest"
