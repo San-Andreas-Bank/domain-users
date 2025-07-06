@@ -20,11 +20,9 @@ describe('POST /auth/logout', () => {
   });
 
   it('debería cerrar la sesión del usuario', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/auth/logout')
-      .send({
-        email: 'chulded3@gmail.com',
-      });
+    const res = await request(app.getHttpServer()).post('/auth/logout').send({
+      email: 'chulded3@gmail.com',
+    });
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual({

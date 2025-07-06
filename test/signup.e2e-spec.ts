@@ -1,4 +1,4 @@
-import request from 'supertest'; 
+import request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
@@ -20,17 +20,15 @@ describe('POST /auth/signup', () => {
   });
 
   it('debería registrar un nuevo usuario con todos los campos requeridos', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/auth/signup')
-      .send({
-        name: 'Carlos',
-        lastName: 'Perez',
-        telephone: '0991234567',
-        dateOfBirth: '2000-01-01',
-        email: 'chulded3@example.com',
-        password: 'test1234',
-        confirmPassword: 'test1234',
-      });
+    const res = await request(app.getHttpServer()).post('/auth/signup').send({
+      name: 'Carlos',
+      lastName: 'Perez',
+      telephone: '0991234567',
+      dateOfBirth: '2000-01-01',
+      email: 'chulded3@example.com',
+      password: 'test1234',
+      confirmPassword: 'test1234',
+    });
 
     console.log(res.body); // 👈 Agrega esto
     expect(res.status).toBe(201);

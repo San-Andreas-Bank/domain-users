@@ -20,12 +20,10 @@ describe('POST /auth/login', () => {
   });
 
   it('debería iniciar sesión correctamente y devolver token', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'chulded3@gmail.com',
-        password: 'test1234',
-      });
+    const res = await request(app.getHttpServer()).post('/auth/login').send({
+      email: 'chulded3@gmail.com',
+      password: 'test1234',
+    });
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('accessToken');

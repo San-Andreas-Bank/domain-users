@@ -8,9 +8,9 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'https://front-streamverse.vercel.app', // Producción
-    'http://localhost:4000',                // Desarrollo local
-    'http://3.88.7.20:4000',                // Frontend en EC2
-    'http://54.157.182.4:4000',             // Otra IP de EC2 si aplica
+    'http://localhost:4000', // Desarrollo local
+    'http://3.88.7.20:4000', // Frontend en EC2
+    'http://54.157.182.4:4000', // Otra IP de EC2 si aplica
   ];
 
   app.enableCors({
@@ -31,8 +31,9 @@ async function bootstrap() {
   app.use(
     rateLimit({
       windowMs: 60 * 1000, // 1 minuto
-      max: 5,              // 5 peticiones por IP por minuto
-      message: 'Has excedido el límite de solicitudes. Intenta de nuevo más tarde.',
+      max: 5, // 5 peticiones por IP por minuto
+      message:
+        'Has excedido el límite de solicitudes. Intenta de nuevo más tarde.',
       headers: true,
     }),
   );
