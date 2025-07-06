@@ -24,6 +24,7 @@ import {
   ResetPasswordQueryDto,
 } from './dto/password/reset-password.query.dto';
 import { CreateLogoutDto } from './dto/children-dto/create-logout.dto';
+import { UpdateAuthDto } from './dto/password/update-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -96,19 +97,18 @@ export class AuthController {
     return req.user;
   }
 
-  @Post()
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+    return this.authService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: any) {
-    return this.authService.update({ id: +id, ...updateAuthDto });
+  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(id, updateAuthDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    return this.authService.remove(id);
   }
 }

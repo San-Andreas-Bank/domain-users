@@ -19,6 +19,7 @@ import { TOKEN_EXPIRATION_MS } from 'src/common/constants';
 import { ForgotPasswordDto } from '../dto/password/forgot-password.dto';
 import { EmailService } from './email/email.service';
 import { CreateLogoutDto } from '../dto/children-dto/create-logout.dto';
+import { UpdateAuthDto } from '../dto/password/update-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,10 +31,7 @@ export class AuthService {
     private readonly logger: Logger,
   ) {}
 
-  async validateUser({
-    email,
-    password,
-  }: CreateLoginDto): Promise<User | null> {
+  async validateUser({ email, password }: CreateLoginDto): Promise<User> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
@@ -41,15 +39,11 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-  async createLogin(
-    user: User,
-  ): Promise<{ userId: string; username: string; accessToken: string }> {
+  async createLogin(user: User): Promise<{ userId: string; username: string; accessToken: string }> {
     try {
       const payload = { sub: user.id, email: user.email };
       const initDateToken = new Date();
-      const expirationToken = new Date(
-        initDateToken.getTime() + TOKEN_EXPIRATION_MS,
-      );
+      const expirationToken = new Date(initDateToken.getTime() + TOKEN_EXPIRATION_MS);
       const accessToken = this.jwtService.sign(payload, {
         expiresIn: TOKEN_EXPIRATION_MS / 1000,
         algorithm: 'HS256',
@@ -71,9 +65,7 @@ export class AuthService {
     }
   }
 
-  async createLogout({
-    email,
-  }: CreateLogoutDto): Promise<{ ok: boolean; msg: string }> {
+  async createLogout({ email }: CreateLogoutDto): Promise<{ ok: boolean; msg: string }> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       throw new NotFoundException(`No user found for email: ${email}`);
@@ -90,11 +82,9 @@ export class AuthService {
 
   async userExists({ email }: CreateSignupDto): Promise<void> {
     const user = await this.userRepository.findOne({ where: { email } });
-    if (!!user)
-      throw new HttpException(
-        'Email duplicated, please enter another email.',
-        HttpStatus.BAD_REQUEST,
-      );
+    if (user) {
+      throw new HttpException('Email duplicated, please enter another email.', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createSignup(userData: Partial<User>): Promise<any> {
@@ -118,20 +108,13 @@ export class AuthService {
     };
   }
 
-  async forgotPassword({
-    email,
-  }: ForgotPasswordDto): Promise<void | HttpException> {
+  async forgotPassword({ email }: ForgotPasswordDto): Promise<void> {
     try {
       const user = await this.userRepository.findOne({ where: { email } });
 
       this.logger.log('Checking user existence');
-      console.log(user);
-
       if (!user) {
-        throw new HttpException(
-          `No user found for email: ${email}`,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException(`No user found for email: ${email}`, HttpStatus.BAD_REQUEST);
       }
 
       console.log(`🔐 Reset info para ${email}:`);
@@ -141,75 +124,47 @@ export class AuthService {
       await this.emailService.sendResetPasswordLink(email);
     } catch (error) {
       this.logger.error('Error in forgotPassword function', error);
-      throw new HttpException(
-        `No user found for email: ${email}`,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(`No user found for email: ${email}`, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async resetPasswordOTP(
-    otp: string,
-    email: string,
-    newPassword: string,
-  ): Promise<boolean> {
-    try {
-      const user = await this.userRepository.findOne({ where: { email } });
+  async resetPasswordOTP(otp: string, email: string, newPassword: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { email } });
 
-      if (!user) {
-        throw new NotFoundException(`No user found for email: ${email}`);
-      }
-
-      if (!user.resetPasswordOTP || user.resetPasswordOTP !== otp) {
-        throw new BadRequestException('Invalid OTP');
-      }
-
-      if (
-        !user.resetPasswordExpires ||
-        user.resetPasswordExpires < new Date()
-      ) {
-        throw new BadRequestException('OTP has expired');
-      }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      user.password = hashedPassword;
-      user.resetPasswordOTP = null;
-      user.resetPasswordExpires = null;
-      user.resetPasswordToken = null;
-      await this.userRepository.save(user);
-
-      return true;
-    } catch (error) {
-      if (
-        error instanceof UnauthorizedException ||
-        error instanceof BadRequestException ||
-        error instanceof NotFoundException
-      )
-        throw error;
-
-      throw new HttpException(
-        'Internal Error Forgot Password',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
     }
+
+    if (!user.resetPasswordOTP || user.resetPasswordOTP !== otp) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordOTP = null;
+    user.resetPasswordExpires = null;
+    user.resetPasswordToken = null;
+
+    await this.userRepository.save(user);
+
+    return true;
   }
 
-  async resetPasswordToken(
-    token: string,
-    newPassword: string,
-  ): Promise<boolean> {
+  async resetPasswordToken(token: string, newPassword: string): Promise<boolean> {
     try {
       const email = await this.emailService.decodeConfirmationToken(token);
       const user = await this.userRepository.findOne({ where: { email } });
+
       if (!user) {
         throw new NotFoundException(`No token valid`);
       }
 
-      if (
-        !user.resetPasswordExpires ||
-        user.resetPasswordExpires < new Date()
-      ) {
-        throw new UnauthorizedException('OTP has expired');
+      if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+        throw new UnauthorizedException('Token has expired');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -217,6 +172,7 @@ export class AuthService {
       user.resetPasswordOTP = null;
       user.resetPasswordExpires = null;
       user.resetPasswordToken = null;
+
       await this.userRepository.save(user);
 
       return true;
@@ -225,25 +181,48 @@ export class AuthService {
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
         error instanceof NotFoundException
-      )
+      ) {
         throw error;
+      }
 
-      throw new HttpException(
-        'Internal Error Forgot Password',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException('Internal Error Forgot Password', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
 
-  update(id: number) {
-    return `This action updates a #${id} auth`;
+  async update(id: string, dto: UpdateAuthDto): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const updatedUser = Object.assign(user, dto);
+    await this.userRepository.save(updatedUser);
+
+    return {
+      ok: true,
+      msg: `User with ID ${id} updated successfully`,
+      data: updatedUser,
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async remove(id: string): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    await this.userRepository.delete(id);
+    return {
+      ok: true,
+      msg: `User with ID ${id} deleted.`,
+    };
   }
 }
