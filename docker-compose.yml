@@ -1,22 +1,3 @@
-#services:
- # app:
-  #  container_name: ms-auth-session
-   # image: edchulde/ms-auth-session:latest # 🚀 Siempre usa la última imagen
-    #restart: always # 🚀 Se reinicia automáticamente si falla
-    #pull_policy: always # 🚀 Baja la última imagen cada vez que ejecutas `docker compose up`
-    #build:
-      #context: .
-      #dockerfile: Dockerfile
-    #environment:
-      #env_file: '.env'
-    #ports:
-      #- 9000:3000
-    #volumes:
-      #- .:/app
-      #- /app/node_modules
-    #command: npm run start:dev
-
-
 version: '3.8'
 
 services:

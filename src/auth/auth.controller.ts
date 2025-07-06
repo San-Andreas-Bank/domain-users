@@ -6,11 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  UnauthorizedException,
   UseGuards,
   Request,
-  HttpException,
-  HttpStatus,
   Logger,
   BadRequestException,
   Query,
@@ -27,7 +24,7 @@ import {
   ResetPasswordQueryDto,
 } from './dto/password/reset-password.query.dto';
 import { CreateLogoutDto } from './dto/children-dto/create-logout.dto';
-import { PickType } from '@nestjs/mapped-types';
+import { UpdateAuthDto } from './dto/password/update-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,9 +35,7 @@ export class AuthController {
 
   @Post('login')
   async createLogin(@Body() dto: CreateLoginDto) {
-    // find user
     const user = await this.authService.validateUser(dto);
-    // create token user
     return await this.authService.createLogin(user);
   }
 
@@ -51,9 +46,7 @@ export class AuthController {
 
   @Post('signup')
   async createSignup(@Body() dto: CreateSignupDto) {
-    // validate if user exists
     await this.authService.userExists(dto);
-    // create sign up
     return await this.authService.createSignup(dto);
   }
 
@@ -74,7 +67,7 @@ export class AuthController {
       throw new BadRequestException('Either OTP or Token must be provided.');
     }
 
-    let successMsg = { ok: true, msg: 'Password successfully reseted.' };
+    const successMsg = { ok: true, msg: 'Password successfully reseted.' };
 
     if (query.method === ResetMethodQuery.OTP) {
       const response = await this.authService.resetPasswordOTP(
@@ -104,19 +97,18 @@ export class AuthController {
     return req.user;
   }
 
-  @Post()
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+    return this.authService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: any) {
-    return this.authService.update(+id, updateAuthDto);
+  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(id, updateAuthDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    return this.authService.remove(id);
   }
 }

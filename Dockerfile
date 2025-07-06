@@ -13,14 +13,14 @@ RUN npm install --omit=dev
 
 COPY . .
 
+# Copiar archivo .env (ya que está subido al repo para este caso educativo)
+COPY .env .env
+
 # Recompilar bcrypt para la arquitectura correcta
 RUN npm rebuild bcrypt --build-from-source
 
-# Construir la aplicación (si es necesario)
-# RUN npm run build
-
-# Exponer el puerto en el que la app correrá dentro del contenedor
+# Exponer el puerto
 EXPOSE 3000
 
-# Comando por defecto al iniciar el contenedor
+# Ejecutar la app
 CMD ["npm", "run", "start"]
