@@ -52,6 +52,8 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_KEY }}
           script: |
+            echo "🔍 Verificando variable DOCKER_USERNAME: $DOCKER_USERNAME"
+            echo "📦 Imagen a ejecutar: $DOCKER_USERNAME/domain-auth:latest"
             docker pull $DOCKER_USERNAME/domain-auth:latest
             docker stop domain-auth || true && docker rm domain-auth || true
             docker run -d --name domain-auth \
