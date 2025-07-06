@@ -104,7 +104,7 @@ export class AuthController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAuthDto: any) {
-    return this.authService.update(+id, updateAuthDto);
+    return this.authService.update({ id: +id, ...updateAuthDto });
   }
 
   @Delete(':id')
