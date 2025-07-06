@@ -43,7 +43,7 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_KEY }}
           source: ".env"
-          target: "/home/ubuntu/.env"
+          target: "/home/ubuntu"  # ✅ CAMBIO AQUÍ
 
       - name: Deploy to EC2 via SSH (run container only)
         uses: appleboy/ssh-action@v1.0.0
